@@ -1,0 +1,52 @@
+clc;
+clear; 
+
+%% Signal Parameters
+fs = 1e6; % Sampling frequency
+T = 1/fs; % Sampling period
+t = 0:T:1e-3-T; % Time vector
+f_baseband = 10e3; % Baseband frequency
+
+% Generate Baseband Signal (QPSK Modulated)
+data = randi([0 1], 1, length(t));
+modulated_signal = cos(2*pi*f_baseband*t) + 1i*sin(2*pi*f_baseband*t);
+
+%% FIR Filter Design (Using Low-Pass Windowed Method)
+N_FIR = 50; % Filter order
+fc = 30e3; % Cutoff frequency
+fir_coeff = fir1(N_FIR, 2*fc/fs);
+filtered_FIR = filter(fir_coeff, 1, modulated_signal);
+
+%% IIR Filter Design (Using Butterworth)
+N_IIR = 5; % Filter order
+[b, a] = butter(N_IIR, 2*fc/fs);
+filtered_IIR = filter(b, a, modulated_signal);
+
+%% ISI and Phase Distortion Evaluation
+ISI_FIR = sum(abs(filtered_FIR(1:end-1) - filtered_FIR(2:end))); % ISI estimation
+ISI_IIR = sum(abs(filtered_IIR(1:end-1) - filtered_IIR(2:end)));
+
+phase_FIR = angle(filtered_FIR);
+phase_IIR = angle(filtered_IIR);
+
+%% Plot Results
+figure;
+subplot(2,1,1);
+plot(t, abs(filtered_FIR), 'r'); hold on;
+plot(t, abs(filtered_IIR), 'b');
+xlabel('Time (s)');
+ylabel('Amplitude');
+title('FIR vs. IIR Filtered Signal');
+legend('FIR', 'IIR');
+grid on;
+
+subplot(2,1,2);
+plot(t, phase_FIR, 'r'); hold on;
+plot(t, phase_IIR, 'b');
+xlabel('Time (s)');
+ylabel('Phase (radians)');
+title('Phase Distortion Comparison');
+legend('FIR Phase', 'IIR Phase');
+grid on;
+
+disp(['ISI Reduction - FIR: ', num2str(ISI_FIR), ', IIR: ', num2str(ISI_IIR)]);
