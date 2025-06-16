@@ -1,0 +1,69 @@
+clear; clc;
+
+%% Simulation Parameters
+num_users = 20; % Number of ground users
+area_size = 500; % Coverage area (meters)
+uav_height_range = [50 300]; % UAV altitude range (meters)
+uav_speed = 10; % UAV speed (m/s)
+num_steps = 100; % Time steps
+
+% User Positions (Randomly Distributed)
+user_x = area_size * rand(1, num_users);
+user_y = area_size * rand(1, num_users);
+
+%% UAV Initialization
+uav_x = area_size / 2; % Initial UAV position
+uav_y = area_size / 2;
+uav_height = 100; % Initial altitude
+
+%% Communication Parameters
+Pt = 30; % Transmit power (dBm)
+noise_power = -90; % Noise power (dBm)
+channel_gain = @(d,h) Pt - 20*log10(d) - 20*log10(h) - 30; % Path loss model
+
+%% Simulation Loop
+coverage_results = zeros(num_steps, 1);
+optimal_trajectory = zeros(num_steps, 2);
+optimal_altitude = zeros(num_steps, 1);
+
+for t = 1:num_steps
+    % UAV moves in circular trajectory
+    theta = 2 * pi * (t / num_steps);
+    uav_x = area_size / 2 + 100 * cos(theta);
+    uav_y = area_size / 2 + 100 * sin(theta);
+    
+    % UAV Altitude Optimization (Adaptive Adjustment)
+    uav_height = max(uav_height_range(1), min(uav_height_range(2), 200 + 50*sin(theta)));
+
+    % Compute Signal-to-Noise Ratio (SNR) for each user
+    snr_values = zeros(1, num_users);
+    for i = 1:num_users
+        d = sqrt((uav_x - user_x(i))^2 + (uav_y - user_y(i))^2);
+        snr_values(i) = channel_gain(d, uav_height) - noise_power;
+    end
+    
+    % Compute Coverage Percentage
+    coverage_results(t) = sum(snr_values > 10) / num_users * 100;
+    
+    % Store Optimal Trajectory and Altitude
+    optimal_trajectory(t, :) = [uav_x, uav_y];
+    optimal_altitude(t) = uav_height;
+end
+
+%% Plot Results
+figure;
+plot(1:num_steps, coverage_results, '-o');
+xlabel('Time Steps');
+ylabel('Coverage Percentage');
+title('UAV-Assisted Relay Coverage Performance');
+grid on;
+
+figure;
+plot3(optimal_trajectory(:,1), optimal_trajectory(:,2), optimal_altitude, '-o');
+xlabel('X Position');
+ylabel('Y Position');
+zlabel('Altitude');
+title('Optimized UAV Trajectory and Altitude');
+grid on;
+
+disp('Simulation Completed Successfully!');
