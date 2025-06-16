@@ -1,0 +1,31 @@
+MIMO Simulation for 5G Downlink Using Zero Forcing and MMSE Precoding
+
+clc; clear; close all;
+
+% System Parameters Nt = 64; % Number of transmit antennas (Base Station) Nr = 1; % Number of receive antennas per user K = 10; % Number of users SNR_dB = 10; % Signal-to-Noise Ratio in dB
+
+% Generate random channel matrix (Rayleigh fading) H = (randn(K,Nt) + 1j*randn(K,Nt)) / sqrt(2);
+
+% Compute ZF Precoder H_inv_ZF = pinv(H); % Pseudoinverse for Zero-Forcing W_ZF = H_inv_ZF / norm(H_inv_ZF, 'fro'); % Normalization
+
+% Transmit signal data = (randn(K,1) + 1j*randn(K,1)); % Random transmitted symbols txSignal_ZF = W_ZF * data;
+
+% Received signal with AWGN rxSignal_ZF = H * txSignal_ZF + (randn(K,1) + 1j*randn(K,1)) * 10^(-SNR_dB/20);
+
+% Noise variance sigma2 = 10^(-SNR_dB/10);
+
+% Compute MMSE Precoder W_MMSE = H' * inv(H * H' + sigma2 * eye(K)); % MMSE Weight Matrix W_MMSE = W_MMSE / norm(W_MMSE, 'fro'); % Normalization
+
+% Transmit signal txSignal_MMSE = W_MMSE * data;
+
+% Received signal with AWGN rxSignal_MMSE = H * txSignal_MMSE + (randn(K,1) + 1j*randn(K,1)) * 10^(-SNR_dB/20);
+
+% Compute SINR (Signal-to-Interference plus Noise Ratio) SINR_ZF = abs(diag(H * W_ZF)).^2 / sigma2; SINR_MMSE = abs(diag(H * W_MMSE)).^2 / sigma2;
+
+% Compute achievable rate (Shannon Capacity) Rate_ZF = sum(log2(1 + SINR_ZF)); Rate_MMSE = sum(log2(1 + SINR_MMSE));
+
+% Display results disp(['Throughput using Zero Forcing: ', num2str(Rate_ZF), ' bits/s/Hz']); disp(['Throughput using MMSE: ', num2str(Rate_MMSE), ' bits/s/Hz']);
+
+% Fairness Index (Jain's Index) Fairness_ZF = (sum(SINR_ZF)^2) / (K * sum(SINR_ZF.^2)); Fairness_MMSE = (sum(SINR_MMSE)^2) / (K * sum(SINR_MMSE.^2));
+
+disp(['Fairness Index for ZF: ', num2str(Fairness_ZF)]); disp(['Fairness Index for MMSE: ', num2str(Fairness_MMSE)]);
