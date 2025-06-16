@@ -1,0 +1,33 @@
+Adaptive Modulation and Coding Scheme (AMC) in 5G NR system
+
+clc; clear;
+
+%% Parameters SNR_values = -5:2:25; % Range of SNR values modulation_types = {'QPSK', '16QAM', '64QAM'}; % Possible modulations
+
+%% SNR Thresholds for Modulation Switching thresholds = [5, 15]; % SNR thresholds for switching modulation (example values)
+
+%% Channel Model (Rayleigh fading) num_samples = 10000; % Number of transmitted symbols fading_channel = sqrt(0.5) * (randn(1, num_samples) + 1i * randn(1, num_samples));
+
+%% Simulation ber_results = zeros(length(SNR_values), length(modulation_types)); throughput_results = zeros(size(SNR_values));
+
+for i = 1:length(SNR_values) snr = SNR_values(i); % Select modulation type based on SNR if snr < thresholds(1) mod_type = 1; % QPSK M = 4; elseif snr < thresholds(2) mod_type = 2; % 16QAM M = 16; else mod_type = 3; % 64QAM M = 64; end
+
+% Generate symbols
+data_symbols = randi([0 M-1], 1, num_samples);
+modulated_signal = qammod(data_symbols, M, 'UnitAveragePower', true);
+
+% Apply fading channel and noise
+received_signal = modulated_signal .* fading_channel + awgn(modulated_signal, snr, 'measured');
+
+% Demodulation
+demodulated_symbols = qamdemod(received_signal, M, 'UnitAveragePower', true);
+num_errors = sum(data_symbols ~= demodulated_symbols);
+ber_results(i, mod_type) = num_errors / num_samples;
+
+% Throughput Calculation (Simplified)
+throughput_results(i) = log2(M) * (1 - ber_results(i, mod_type));
+end
+
+%% Plot Results figure; plot(SNR_values, throughput_results, '-o'); xlabel('SNR (dB)'); ylabel('Throughput (bits per symbol)'); title('Adaptive Modulation Throughput in 5G NR'); grid on;
+
+figure; semilogy(SNR_values, ber_results, '-o'); xlabel('SNR (dB)'); ylabel('Bit Error Rate (BER)'); title('BER Performance Under Different Modulation Schemes'); legend(modulation_types); grid on
