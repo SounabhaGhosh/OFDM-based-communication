@@ -1,0 +1,104 @@
+% Autoencoder-Based End-to-End Communication System using Neural Networks
+clc; clear; close all;
+
+%% Parameters
+M = 4; % Modulation order (e.g., QPSK)
+num_symbols = 1000; % Number of symbols in the dataset
+num_epochs = 100; % Training epochs
+learning_rate = 0.01; % Learning rate
+
+%% Generate Random PSK Symbols
+data = randi([0 M-1], num_symbols, 1);
+tx_signal = pskmod(data, M, pi/M, 'gray');
+
+% Normalize data
+tx_signal = tx_signal / max(abs(tx_signal));
+
+%% Define Neural Network Layers
+layers = [
+    featureInputLayer(2, 'Normalization', 'none')  % Input (Transmitter)
+    fullyConnectedLayer(4)  % Encoder
+    reluLayer
+    fullyConnectedLayer(2)  % Channel Simulation Layer
+    tanhLayer
+    fullyConnectedLayer(4)  % Decoder
+    reluLayer
+    fullyConnectedLayer(2)  % Output (Receiver)
+    regressionLayer
+];
+
+%% Prepare Training Data
+XTrain = [real(tx_signal) imag(tx_signal)];
+YTrain = XTrain; % Target output is the same as input (autoencoder)
+
+%% Set Training Options
+options = trainingOptions('adam', ...
+    'MaxEpochs', num_epochs, ...
+    'InitialLearnRate', learning_rate, ...
+    'Verbose', true, ...
+    'Plots', 'training-progress');
+
+%% Train Autoencoder Network
+net = trainNetwork(XTrain, YTrain, layers, options);
+
+%% Transmit and Recover Data
+rx_signal = predict(net, XTrain); % Pass through trained network
+
+%% Plot Results
+figure;
+subplot(2,1,1); scatter(real(tx_signal), imag(tx_signal)); title('Transmitted Symbols');
+subplot(2,1,2); scatter(rx_signal(:,1), rx_signal(:,2)); title('Recovered Symbols (Autoencoder)');
+
+disp('Autoencoder-Based Communication System Simulation Completed!');
+ System using Neural Networks
+clc; clear; close all;
+
+%% Parameters
+M = 4; % Modulation order (e.g., QPSK)
+num_symbols = 1000; % Number of symbols in the dataset
+num_epochs = 100; % Training epochs
+learning_rate = 0.01; % Learning rate
+
+%% Generate Random PSK Symbols
+data = randi([0 M-1], num_symbols, 1);
+tx_signal = pskmod(data, M, pi/M, 'gray');
+
+% Normalize data
+tx_signal = tx_signal / max(abs(tx_signal));
+
+%% Define Neural Network Layers
+layers = [
+    featureInputLayer(2, 'Normalization', 'none')  % Input (Transmitter)
+    fullyConnectedLayer(4)  % Encoder
+    reluLayer
+    fullyConnectedLayer(2)  % Channel Simulation Layer
+    tanhLayer
+    fullyConnectedLayer(4)  % Decoder
+    reluLayer
+    fullyConnectedLayer(2)  % Output (Receiver)
+    regressionLayer
+];
+
+%% Prepare Training Data
+XTrain = [real(tx_signal) imag(tx_signal)];
+YTrain = XTrain; % Target output is the same as input (autoencoder)
+
+%% Set Training Options
+options = trainingOptions('adam', ...
+    'MaxEpochs', num_epochs, ...
+    'InitialLearnRate', learning_rate, ...
+    'Verbose', true, ...
+    'Plots', 'training-progress');
+
+%% Train Autoencoder Network
+net = trainNetwork(XTrain, YTrain, layers, options);
+
+%% Transmit and Recover Data
+rx_signal = predict(net, XTrain); % Pass through trained network
+
+%% Plot Results
+figure;
+subplot(2,1,1); scatter(real(tx_signal), imag(tx_signal)); title('Transmitted Symbols');
+subplot(2,1,2); scatter(rx_signal(:,1), rx_signal(:,2)); title('Recovered Symbols (Autoencoder)');
+
+disp('Autoencoder-Based Communication System Simulation Completed!');
