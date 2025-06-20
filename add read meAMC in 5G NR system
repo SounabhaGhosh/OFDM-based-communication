@@ -1,1 +1,16 @@
+Simulates adaptiv modulation switching (QPSK, 16QAM, 64QAM) based on SNR thresholds
 
+Applies Rayleigh fading and AWGN to the transmitted signal
+
+Computes Bit Error Rate (BER) and Throughput
+
+Plots the results for visualization
+
+Promote Intelligent Communication Systems
+By simulating adaptive modulation, the project demonstrates how systems can make smart, dynamic decisions (like choosing between QPSK or 64QAM) to optimize throughput and reliability based on environmental conditions like SNR.
+
+Bridge Theory and Real-World Wireless Systems
+This simulation helps translate complex concepts from textbooks (like fading channels, modulation, BER) into practical, visual results — aiding students, engineers, and researchers in better understanding how adaptive systems behave in real-life 5G networks.
+
+Enable Future-Ready Network Design
+With 5G and beyond requiring massive connectivity, low latency, and high data rates, adaptive modulation is a core enabler. This project provides a foundation for developing and testing link adaptation strategies crucial to next-gen networks.
